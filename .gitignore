@@ -1,0 +1,30 @@
+#  Auto Generated File
+# =====================
+
+**/.project
+**/.classpath
+**/.settings/
+**/nbproject/
+
+.git/
+**/target/
+**/rpmbuild-root/
+**/build/
+**/bin/
+**/out/
+
+*.zip
+*.exe
+*.rpm
+*.jar
+*.war
+*.ear
+*.class
+*.iml
+*.idea
+*.lock
+*.out
+
+*.swp
+.*.swp
+*~
