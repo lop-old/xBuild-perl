@@ -6,9 +6,9 @@ use IO::File;
 
 
 
-our Readonly $INSTANCE_SLEEP_MAX_INTERVAL =  30.0;  # 30 seconds
-our Readonly $INSTANCE_SLEEP_INCREMENT    =   0.5;  # .5 seconds
-our Readonly $INSTANCE_SLEEP_MAX_TIME     = 300.0;  #  5 minutes
+our $INSTANCE_SLEEP_MAX_INTERVAL =  30.0;  # 30 seconds
+our $INSTANCE_SLEEP_INCREMENT    =   0.5;  # .5 seconds
+our $INSTANCE_SLEEP_MAX_TIME     = 300.0;  #  5 minutes
 
 
 
@@ -31,9 +31,11 @@ sub wait_for_instance {
 		$totaltime += $sleeptime;
 		while ( is_single_instance() eq 0 ) {
 			# max time
-			if ($totaltime >= $main::INSTANCE_SLEEP_MAX_TIME) {
-				error ("Max wait time reached! ${main::INSTANCE_SLEEP_MAX_TIME}s");
-				exit 1;
+			if ($main::INSTANCE_SLEEP_MAX_TIME > 0.0) {
+				if ($totaltime >= $main::INSTANCE_SLEEP_MAX_TIME) {
+					error ("Max wait time reached! ${main::INSTANCE_SLEEP_MAX_TIME}s");
+					exit 1;
+				}
 			}
 			# increment
 			if ($sleeptime < $main::INSTANCE_SLEEP_MAX_INTERVAL) {

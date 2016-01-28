@@ -104,6 +104,9 @@ sub display_help {
 	print "\n";
 	print "  -n, --build-number  set the build number\n";
 	print "\n";
+	print "  -w, --max-wait  set the max wait in seconds if another instance is busy\n";
+	print "                  default: 300 (5 minutes)  or set to 0 for no timeout\n";
+	print "\n";
 	print "  -t, --dry      dry run without writing\n";
 	print "  -d, --debug    debug mode, most verbose logging\n";
 	print "\n";
@@ -152,6 +155,9 @@ while (my $arg = shift(@ARGV)) {
 			case '-n' {
 				$arg = '--build-number';
 			}
+			case '-w' {
+				$arg = '--max-wait';
+			}
 			case '-t' {
 				$arg = '--dry';
 			}
@@ -168,6 +174,9 @@ while (my $arg = shift(@ARGV)) {
 		switch ($arg) {
 			case '--build-number' {
 				$project_build_number = shift(@ARGV);
+			}
+			case '--max-wait' {
+				$main::INSTANCE_SLEEP_MAX_TIME = shift(@ARGV);
 			}
 			case '--dry' {
 				$dryrun = 1;
