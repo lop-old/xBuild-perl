@@ -6,8 +6,9 @@ use IO::File;
 
 
 
-our Readonly $MAX_INSTANCE_SLEEP       = 30.0;
-our Readonly $INCREMENT_INSTANCE_SLEEP =  0.5;
+our Readonly $INSTANCE_SLEEP_MAX_INTERVAL =  30.0;  # 30 seconds
+our Readonly $INSTANCE_SLEEP_INCREMENT    =   0.5;  # .5 seconds
+our Readonly $INSTANCE_SLEEP_MAX_TIME     = 300.0;  #  5 minutes
 
 
 
@@ -22,17 +23,26 @@ sub pid_exists {
 our $PID_FILE_HANDLE;
 our $WROTE_PID_FILE = 0;
 sub wait_for_instance {
-	my $sleeptime = $main::INCREMENT_INSTANCE_SLEEP;
+	my $sleeptime = $main::INSTANCE_SLEEP_INCREMENT;
+	my $totaltime = 0.0;
 	if ( is_single_instance() eq 0 ) {
 		print "\n";
 		sleep($sleeptime);
+		$totaltime += $sleeptime;
 		while ( is_single_instance() eq 0 ) {
-			if ($sleeptime < $main::MAX_INSTANCE_SLEEP) {
-				$sleeptime+=$main::INCREMENT_INSTANCE_SLEEP;
+			# max time
+			if ($totaltime >= $main::INSTANCE_SLEEP_MAX_TIME) {
+				error ("Max wait time reached! ${main::INSTANCE_SLEEP_MAX_TIME}s");
+				exit 1;
+			}
+			# increment
+			if ($sleeptime < $main::INSTANCE_SLEEP_MAX_INTERVAL) {
+				$sleeptime+=$main::INSTANCE_SLEEP_INCREMENT;
 			}
 			my $now = localtime();
 			printf " [ %s ]  %.1fs  Waiting for another instance to finish..\n", $now, $sleeptime;
 			sleep($sleeptime);
+			$totaltime += $sleeptime;
 		}
 		print "\n";
 	}
