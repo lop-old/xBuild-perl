@@ -50,10 +50,10 @@ sub pid_exists {
 our $PID_FILE_HANDLE;
 our $WROTE_PID_FILE = 0;
 sub single_instance {
-	if ($main::INSTANCE_SLEEP_MAX_TIME > 0.0) {
-		wait_for_instance ();
-	} else {
+	if ($main::INSTANCE_SLEEP_MAX_TIME == 0.0) {
 		allow_one_instance ();
+	} else {
+		wait_for_instance ();
 	}
 }
 sub wait_for_instance {
@@ -128,6 +128,9 @@ END {
 			debug ('Removed lock file');
 		}
 	}
+}
+sub set_INSTANCE_SLEEP_MAX_TIME {
+	$main::INSTANCE_SLEEP_MAX_TIME = shift;
 }
 
 
