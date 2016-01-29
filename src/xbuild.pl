@@ -90,11 +90,6 @@ exit 1;
 
 
 
-our $PWD = getcwd;
-if (length($PWD) == 0) {
-	error ('Failed to get current working directory!');
-	exit 1;
-}
 
 
 
@@ -216,7 +211,7 @@ if ($dryrun != 0) {
 	debug ('Dry run enabled');
 }
 debug ();
-if ($PWD =~ m/^\/(usr|bin)\/.*/ ) {
+if ($main::PWD =~ m/^\/(usr|bin)\/.*/ ) {
 	error ('Sorry, you cannot run this command from within /usr or /bin');
 	exit 1;
 }
@@ -331,7 +326,7 @@ exit 1;
 #		debug ("File not found: ${main::deploy_config_file}");
 #	} else {
 #		debug ("Loading file: $found");
-#		my $data = load_file_contents ("$PWD/$found");
+#		my $data = load_file_contents ("${main::PWD}/${found}");
 #		if (defined $data && length($data) > 0) {
 #			$deploy = JSON->new->utf8->decode($data);
 #		}

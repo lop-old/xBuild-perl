@@ -39,6 +39,14 @@ our $INSTANCE_SLEEP_MAX_TIME     = 300.0;  #  5 minutes
 
 
 
+our $PWD = getcwd;
+if (length($PWD) == 0) {
+	error ('Failed to get current working directory!');
+	exit 1;
+}
+
+
+
 sub pid_exists {
 	my $pid = shift;
 	my $exists = kill 0, $pid;
