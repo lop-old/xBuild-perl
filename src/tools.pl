@@ -49,6 +49,13 @@ sub pid_exists {
 
 our $PID_FILE_HANDLE;
 our $WROTE_PID_FILE = 0;
+sub single_instance {
+	if ($main::INSTANCE_SLEEP_MAX_TIME > 0.0) {
+		wait_for_instance ();
+	} else {
+		allow_one_instance ();
+	}
+}
 sub wait_for_instance {
 	my $sleeptime = $main::INSTANCE_SLEEP_INCREMENT;
 	my $totaltime = 0.0;
