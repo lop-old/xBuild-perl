@@ -8,7 +8,6 @@ Requires        : shellscripts >= 2.0.0
 Requires        : perl
 Requires        : perl-JSON
 Requires        : perl-Proc-PID-File
-Requires        : perl-File-Pid
 Requires        : perl-Readonly
 Requires        : perl-Switch
 Requires        : gradle

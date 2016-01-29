@@ -5,12 +5,13 @@
 ##
 ## Description: Build and deploy script for maven and rpm projects.
 ##
-## Install to location: /usr/bin/shellscripts
+## Install to location: /usr/bin/xBuild
 ##
 ## Download the original from:
-##   http://dl.poixson.com/shellscripts/
+##   http://dl.poixson.com/xBuild/
 ##
-## Required packages: perl-JSON perl-Switch
+## Required packages: perl-JSON perl-Proc-PID-File perl-Readonly perl-Switch
+##                    gradle maven2
 ##
 ## Permission to use, copy, modify, and/or distribute this software for any
 ## purpose with or without fee is hereby granted, provided that the above
