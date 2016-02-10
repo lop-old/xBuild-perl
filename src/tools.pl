@@ -25,6 +25,8 @@
 ##===============================================================================
 # tools.pl
 
+package xBuild;
+
 use strict;
 use warnings;
 
@@ -40,8 +42,8 @@ our $INSTANCE_SLEEP_MAX_TIME     = 300.0;  #  5 minutes
 
 
 our $PWD = getcwd;
-if (length($PWD) == 0) {
-	error ('Failed to get current working directory!');
+if (length($xBuild::PWD) == 0) {
+	xBuild::error ('Failed to get current working directory!');
 	exit 1;
 }
 
@@ -58,14 +60,14 @@ sub pid_exists {
 our $PID_FILE_HANDLE;
 our $WROTE_PID_FILE = 0;
 sub single_instance {
-	if ($main::INSTANCE_SLEEP_MAX_TIME == 0.0) {
+	if ($xBuild::INSTANCE_SLEEP_MAX_TIME == 0.0) {
 		allow_one_instance ();
 	} else {
 		wait_for_instance ();
 	}
 }
 sub wait_for_instance {
-	my $sleeptime = $main::INSTANCE_SLEEP_INCREMENT;
+	my $sleeptime = $xBuild::INSTANCE_SLEEP_INCREMENT;
 	my $totaltime = 0.0;
 	if ( is_single_instance() eq 0 ) {
 		print "\n";
@@ -73,15 +75,15 @@ sub wait_for_instance {
 		$totaltime += $sleeptime;
 		while ( is_single_instance() eq 0 ) {
 			# max time
-			if ($main::INSTANCE_SLEEP_MAX_TIME > 0.0) {
-				if ($totaltime >= $main::INSTANCE_SLEEP_MAX_TIME) {
-					error ("Max wait time reached! ${main::INSTANCE_SLEEP_MAX_TIME}s");
+			if ($xBuild::INSTANCE_SLEEP_MAX_TIME > 0.0) {
+				if ($totaltime >= $xBuild::INSTANCE_SLEEP_MAX_TIME) {
+					xBuild::error ("Max wait time reached! ${xBuild::INSTANCE_SLEEP_MAX_TIME}s");
 					exit 1;
 				}
 			}
 			# increment
-			if ($sleeptime < $main::INSTANCE_SLEEP_MAX_INTERVAL) {
-				$sleeptime+=$main::INSTANCE_SLEEP_INCREMENT;
+			if ($sleeptime < $xBuild::INSTANCE_SLEEP_MAX_INTERVAL) {
+				$sleeptime+=$xBuild::INSTANCE_SLEEP_INCREMENT;
 			}
 			my $now = localtime();
 			printf " [ %s ]  %.1fs  Waiting for another instance to finish..\n", $now, $sleeptime;
@@ -93,52 +95,52 @@ sub wait_for_instance {
 }
 sub allow_one_instance {
 	if ( is_single_instance() eq 0 ) {
-		error ('Another instance is already running!');
+		xBuild::error ('Another instance is already running!');
 		exit 1;
 	}
 }
 sub is_single_instance {
-	if (length($main::PID_FILE) eq 0) {
-		error ('PID_FILE variable not set.');
+	if (length($xBuild::PID_FILE) == 0) {
+		xBuild::error ('PID_FILE variable not set.');
 		exit 1;
 	}
 	# open or create pid file
-	sysopen ($main::PID_FILE_HANDLE, $main::PID_FILE, O_RDWR | O_CREAT)
-		or error ("Cannot open file: $!: $main::PID_FILE");
-#	flock($main::PID_FILE_HANDLE, LOCK_EX)
-#		or error ("Cannot lock file $!: $main::PID_FILE");
-	my $OLD_PID = <$main::PID_FILE_HANDLE>;
+	sysopen ($xBuild::PID_FILE_HANDLE, $xBuild::PID_FILE, O_RDWR | O_CREAT)
+		or xBuild::error ("Cannot open file: $!: $xBuild::PID_FILE");
+#	flock($xBuild::PID_FILE_HANDLE, LOCK_EX)
+#		or xBuild::error ("Cannot lock file $!: $xBuild::PID_FILE");
+	my $OLD_PID = <$xBuild::PID_FILE_HANDLE>;
 	if (defined $OLD_PID && length($OLD_PID) gt 0) {
-		debug ("OLD PID: $OLD_PID");
+		xBuild::debug ("OLD PID: $OLD_PID");
 		if (pid_exists($OLD_PID)) {
-			$main::WROTE_PID_FILE = 0;
+			$xBuild::WROTE_PID_FILE = 0;
 			return 0;
 		}
-		sysseek ($main::PID_FILE_HANDLE, 0, SEEK_SET)
-			or error ("Cannot seek $!: $main::PID_FILE");
-		truncate ($main::PID_FILE_HANDLE, 0)
-			or error ("Cannot truncate $!: $main::PID_FILE");
+		sysseek ($xBuild::PID_FILE_HANDLE, 0, SEEK_SET)
+			or xBuild::error ("Cannot seek $!: $xBuild::PID_FILE");
+		truncate ($xBuild::PID_FILE_HANDLE, 0)
+			or xBuild::error ("Cannot truncate $!: $xBuild::PID_FILE");
 	}
 	# write pid to file
-	$main::WROTE_PID_FILE = 1;
-	syswrite ($main::PID_FILE_HANDLE, $$)
-		or error ("Cannot write to $!: $main::PID_FILE");
+	$xBuild::WROTE_PID_FILE = 1;
+	syswrite ($xBuild::PID_FILE_HANDLE, $$)
+		or xBuild::error ("Cannot write to $!: $xBuild::PID_FILE");
 	return 1;
 }
 END {
-#	flock($main::PID_FILE_HANDLE, LOCK_UN)
-#		or error ("Cannot unlock file $!: $main::PID_FILE");
-	if (defined $main::PID_FILE_HANDLE) {
-		close ($main::PID_FILE_HANDLE);
-		if ( $main::WROTE_PID_FILE eq 1 ) {
-			unlink $main::PID_FILE
-				or error ("Cannot remove $!: $main::PID_FILE");
-			debug ('Removed lock file');
+#	flock($xBuild::PID_FILE_HANDLE, LOCK_UN)
+#		or xBuild::error ("Cannot unlock file $!: $xBuild::PID_FILE");
+	if (defined $xBuild::PID_FILE_HANDLE) {
+		close ($xBuild::PID_FILE_HANDLE);
+		if ( $xBuild::WROTE_PID_FILE == 1 ) {
+			unlink $xBuild::PID_FILE
+				or xBuild::error ("Cannot remove $!: $xBuild::PID_FILE");
+			xBuild::debug ('Removed lock file');
 		}
 	}
 }
 sub set_INSTANCE_SLEEP_MAX_TIME {
-	$main::INSTANCE_SLEEP_MAX_TIME = shift;
+	$xBuild::INSTANCE_SLEEP_MAX_TIME = shift;
 }
 
 
@@ -146,12 +148,12 @@ sub set_INSTANCE_SLEEP_MAX_TIME {
 sub load_file_contents {
 	my $filepath = shift;
 	if (! -f $filepath) {
-		debug ("File not found: $filepath");
+		xBuild::debug ("File not found: $filepath");
 		return "";
 	}
-	debug ("Loading file: $filepath");
+	xBuild::debug ("Loading file: $filepath");
 	open (FILE, '<:encoding(UTF-8)', $filepath)
-		or error ("Unable to open file: $filepath");
+		or xBuild::error ("Unable to open file: $filepath");
 	my $data = "";
 	while (my $line = <FILE>) {
 		chomp $line;
@@ -159,7 +161,7 @@ sub load_file_contents {
 	}
 	close (FILE);
 	if (length($data) == 0) {
-		debug ("File is empty: $filepath");
+		xBuild::debug ("File is empty: $filepath");
 		return "";
 	}
 	return $data;
@@ -170,7 +172,7 @@ sub load_file_contents {
 sub bin_file_exists {
 	my $filename = shift;
 	system ("which $filename >/dev/null || { echo \"Composer is not available - yum install rpm-build\"; exit 1; }")
-		and error ("'which' command failed!");
+		and xBuild::error ("'which' command failed!");
 }
 
 
@@ -184,12 +186,12 @@ sub find_file_in_parents {
 	} elsif ($deep < 0) {
 		return "";
 	}
-	if (! defined $path || length($path) == 0 || $path eq $main::PWD) {
+	if (! defined $path || length($path) == 0 || $path eq $xBuild::PWD) {
 		$path = '.';
 	}
-	debug ("Checking dir: $path");
+	xBuild::debug ("Checking dir: $path");
 	opendir (DIR, $path)
-		or error ("$!: $path");
+		or xBuild::error ("$!: $path");
 	FILE_LOOP:
 	while (my $file = readdir(DIR)) {
 		if (length($file) == 0) {
@@ -199,7 +201,7 @@ sub find_file_in_parents {
 			next FILE_LOOP;
 		}
 		if ($file eq $find) {
-			debug ("Found file: $path / $file");
+			xBuild::debug ("Found file: $path / $file");
 			closedir (DIR);
 			return "$path/$file";
 		}
@@ -213,16 +215,16 @@ sub find_file_in_parents {
 sub run_command {
 	my $cmd = shift;
 	if (length($cmd) == 0) {
-		error ("No command argument provided!");
+		xBuild::error ("No command argument provided!");
 		exit 1;
 	}
-	if ($main::testing == 0) {
-		debug ("COMMAND:\n$cmd");
+	if ($xBuild::testing == 0) {
+		xBuild::debug ("COMMAND:\n$cmd");
 		print "\n";
-		system ($cmd) and error ("Failed to run command!");
+		system ($cmd) and xBuild::error ("Failed to run command!");
 		print "\n";
 	} else {
-		debug ("COMMAND SKIPPED:\n$cmd");
+		xBuild::debug ("COMMAND SKIPPED:\n$cmd");
 	}
 }
 
@@ -314,7 +316,7 @@ sub big_title {
 
 
 sub debug {
-	if ($main::debug eq 0) {
+	if ($xBuild::debug == 0) {
 		return;
 	}
 	my $msg = shift;

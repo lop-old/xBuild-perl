@@ -27,6 +27,8 @@
 ##===============================================================================
 # xbuild.pl
 
+package xBuild;
+
 use strict;
 use warnings;
 
@@ -179,7 +181,7 @@ while (my $arg = shift(@ARGV)) {
 				$dryrun = 1;
 			}
 			case '--debug' {
-				$debug = 1;
+				$xBuild::debug = 1;
 			}
 			case '--help' {
 				display_help();
@@ -192,7 +194,7 @@ while (my $arg = shift(@ARGV)) {
 				exit 1;
 			}
 			else {
-				error ("Unknown argument: $arg");
+				xBuild::error ("Unknown argument: $arg");
 				exit 1;
 			}
 		} # /FLAG_SWITCH
@@ -204,15 +206,15 @@ while (my $arg = shift(@ARGV)) {
 
 
 
-if ($debug != 0) {
-	debug ('Debug mode enabled');
+if ($xBuild::debug != 0) {
+	xBuild::debug ('Debug mode enabled');
 }
 if ($dryrun != 0) {
-	debug ('Dry run enabled');
+	xBuild::debug ('Dry run enabled');
 }
-debug ();
-if ($main::PWD =~ m/^\/(usr|bin)\/.*/ ) {
-	error ('Sorry, you cannot run this command from within /usr or /bin');
+xBuild::debug ();
+if ($xBuild::PWD =~ m/^\/(usr|bin)\/.*/ ) {
+	xBuild::error ('Sorry, you cannot run this command from within /usr or /bin');
 	exit 1;
 }
 
@@ -337,9 +339,9 @@ exit 1;
 
 
 # project name
-#$project_name = $config->{Name};
+#$project_name = $xBuild::config->{Name};
 # project version
-#$project_version = $config->{Version};
+#$project_version = $xBuild::config->{Version};
 
 
 
@@ -461,7 +463,7 @@ exit 1;
 
 
 # version files
-#@project_version_files = @{$config->{'Version Files'}};
+#@project_version_files = @{$xBuild::config->{'Version Files'}};
 #$project_version = parse_version_from_files(@project_version_files);
 
 
@@ -484,7 +486,7 @@ exit 1;
 ##########################################################################################################################################}
 ##########################################################################################################################################my $project_title = "$project_name $project_version $project_build_number";
 ##########################################################################################################################################if (0+@goals_main == 0) {
-##########################################################################################################################################	error ("No main goals to perform..\n");
+##########################################################################################################################################	xBuild::error ("No main goals to perform..\n");
 ##########################################################################################################################################	exit 1;
 ##########################################################################################################################################}
 ##########################################################################################################################################for my $goal (@goals_main) {
@@ -506,15 +508,15 @@ exit 1;
 #		}
 #	}
 #	my $goal_config;
-#	if(exists $config->{Goals}->{$goal}) {
-#		$goal_config = $config->{Goals}->{$goal};
+#	if(exists $xBuild::config->{Goals}->{$goal}) {
+#		$goal_config = $xBuild::config->{Goals}->{$goal};
 #	}
 #	# find goal to run
 #	GOAL_SWITCH:
 #	switch ($goal) {
 #		case 'build' {
 ##########################################################################################################################################			if (0+@goals_build == 0) {
-##########################################################################################################################################				error ("No build goals to perform..\n");
+##########################################################################################################################################				xBuild::error ("No build goals to perform..\n");
 ##########################################################################################################################################				exit 1;
 ##########################################################################################################################################			}
 ##########################################################################################################################################			print " Build Goals: "; print join ", ", @goals_build; print "\n";
@@ -551,7 +553,7 @@ exit 1;
 #			goal_version ($goal_config);
 #		}
 #		else {
-#			error ("Unknown goal: $goal");
+#			xBuild::error ("Unknown goal: $goal");
 #		}
 #	} # /GOAL_SWITCH
 #	$last_goal = $goal;
@@ -573,7 +575,7 @@ exit 1;
 #	my @files = shift;
 #	my $version = "";
 #	if ( (0+@files) == 0 ) {
-#		error ("No version files specified in config file: $project_config_file");
+#		xBuild::error ("No version files specified in config file: ${xBuild::PROJECT_CONFIG_FILE}");
 #		exit 1;
 #	}
 #	# check all files
@@ -588,13 +590,13 @@ exit 1;
 #		# get file extension
 #		my ($ext) = $file =~ /(\.[^.]+)$/;
 #		if (!defined $ext || length($ext) == 0) {
-#			error ("File has no extension: $file");
+#			xBuild::error ("File has no extension: $file");
 #			exit 1;
 #		}
 #		$isempty = 0;
 #		my $vers = parse_version_file($file, $ext);
 #		if (!defined $vers || length($vers) == 0) {
-#			error ("Failed to parse version number from file: $file");
+#			xBuild::error ("Failed to parse version number from file: $file");
 #			exit 1;
 #		}
 #		# store version number
@@ -603,17 +605,17 @@ exit 1;
 #		# verify version number
 #		} else {
 #			if ($version ne $vers) {
-#				error ("Version miss-match:  $version  !=  $vers  in  $file");
+#				xBuild::error ("Version miss-match:  $version  !=  $vers  in  $file");
 #				exit 1;
 #			}
 #		}
 #	}
 #	if ($isempty == 1) {
-#		error ("No version files found in config: $project_config_file");
+#		xBuild::error ("No version files found in config: ${xBuild::PROJECT_CONFIG_FILE}");
 #		exit 1;
 #	}
 #	if (length($version) == 0) {
-#		error ("Failed to detect project version!");
+#		xBuild::error ("Failed to detect project version!");
 #		exit 1;
 #	}
 #	return $version;
@@ -629,7 +631,7 @@ exit 1;
 #	if ($file =~ /\/pom\.xml$/) {
 #		return &parse_version_file_pom_xml ($file);
 #	}
-#	error ("Unknown file type: $file");
+#	xBuild::error ("Unknown file type: $file");
 #	exit 1;
 #}
 
