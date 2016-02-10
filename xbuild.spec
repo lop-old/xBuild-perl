@@ -51,6 +51,9 @@ echo "Install.."
 	"${RPM_BUILD_ROOT}%{prefix}/" \
 #	"${RPM_BUILD_ROOT}%{_sysconfdir}/profile.d/" \
 		|| exit 1
+%{__install} -d -m 0775 \
+	"${RPM_BUILD_ROOT}%{_var}/xBuild/" \
+		|| exit 1
 # copy script files
 for file in \
 	xbuild.pl \
@@ -82,3 +85,4 @@ fi
 %defattr(-,root,root,-)
 %{prefix}/xbuild.pl
 %{_bindir}/xbuild
+%dir %{_var}/xBuild/
