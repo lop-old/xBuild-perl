@@ -43,6 +43,11 @@ our $INSTANCE_SLEEP_MAX_TIME     = 300.0;  #  5 minutes
 
 
 
+# turn off stdout buffering
+$| = 1;
+
+
+
 our $PWD = getcwd;
 if (length($xBuild::PWD) == 0) {
 	xBuild::error ('Failed to get current working directory!');
@@ -71,11 +76,11 @@ sub single_instance {
 sub wait_for_instance {
 	my $sleeptime = $xBuild::INSTANCE_SLEEP_INCREMENT;
 	my $totaltime = 0.0;
-	if ( is_single_instance() eq 0 ) {
+	if ( is_single_instance() == 0 ) {
 		print "\n";
 		sleep($sleeptime);
 		$totaltime += $sleeptime;
-		while ( is_single_instance() eq 0 ) {
+		while ( is_single_instance() == 0 ) {
 			# max time
 			if ($xBuild::INSTANCE_SLEEP_MAX_TIME > 0.0) {
 				if ($totaltime >= $xBuild::INSTANCE_SLEEP_MAX_TIME) {
@@ -96,7 +101,7 @@ sub wait_for_instance {
 	}
 }
 sub allow_one_instance {
-	if ( is_single_instance() eq 0 ) {
+	if ( is_single_instance() == 0 ) {
 		xBuild::error ('Another instance is already running!');
 		exit 1;
 	}
@@ -149,6 +154,10 @@ sub set_INSTANCE_SLEEP_MAX_TIME {
 
 sub load_file_contents {
 	my $filepath = shift;
+	if (length($filepath) == 0) {
+		xBuild::error ("Path argument not provided to load_file_contents() function!");
+		return "";
+	}
 	if (! -f $filepath) {
 		xBuild::debug ("File not found: $filepath");
 		return "";
@@ -341,7 +350,7 @@ sub error {
 	if (!defined $msg || length($msg) == 0) {
 		$msg = "Failed unexpectedly!";
 	}
-	if (!defined $err || length($err) == 0 || $err eq "0") {
+	if (!defined $err || length($err) == 0 || $err == 0) {
 		$err = 1;
 	}
 	print "\n\n";

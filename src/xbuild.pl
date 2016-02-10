@@ -37,7 +37,6 @@ use Readonly;
 use File::Copy;
 use JSON;
 use Switch;
-#use Cwd;
 
 use Data::Dumper;
 
@@ -48,16 +47,18 @@ use Data::Dumper;
 Readonly our $XBUILD_VERSION => '2.0.0';
 Readonly our $PID_FILE => '/var/run/xBuild/xbuild.pid';
 
-Readonly our $PROJECT_CONFIG_FILE  = 'xbuild.json';
-Readonly our $DEPLOY_CONFIG_FILE   = 'xdeploy.json';
+Readonly our $PROJECT_CONFIG_FILE  => 'xbuild.json';
+Readonly our $DEPLOY_CONFIG_FILE   => 'xdeploy.json';
 
-Readonly our $TEMP_BUILD_PATH = '/tmp/xbuild';
-Readonly our $DEPLOY_CONFIG_SEARCH_DEPTH = 2;
+Readonly our $TEMP_BUILD_PATH => '/tmp/xbuild';
+Readonly our $DEPLOY_CONFIG_SEARCH_DEPTH => 2;
 
 ##################################################
 
 
 
+our $config;
+our $deploy;
 our $dryrun = 0;
 
 our $project_build_number = 'x';
