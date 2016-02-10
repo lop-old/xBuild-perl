@@ -83,6 +83,6 @@ fi
 ### Files ###
 %files
 %defattr(-,root,root,-)
-%{prefix}/xbuild.pl
+%attr(555, root, root) %{prefix}/xbuild.pl
 %{_bindir}/xbuild
 %dir %{_var}/xBuild/
