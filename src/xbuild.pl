@@ -58,7 +58,6 @@ Readonly our $DEPLOY_CONFIG_SEARCH_DEPTH = 2;
 
 
 
-our $debug = 0;
 our $dryrun = 0;
 
 our $project_build_number = 'x';

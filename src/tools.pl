@@ -35,6 +35,8 @@ use IO::File;
 
 
 
+our $debug = 0;
+
 our $INSTANCE_SLEEP_MAX_INTERVAL =  30.0;  # 30 seconds
 our $INSTANCE_SLEEP_INCREMENT    =   0.5;  # .5 seconds
 our $INSTANCE_SLEEP_MAX_TIME     = 300.0;  #  5 minutes
