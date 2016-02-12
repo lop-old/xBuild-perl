@@ -56,6 +56,11 @@ if (length($xBuild::PWD) == 0) {
 
 
 
+##################################################
+### single instance
+
+
+
 sub pid_exists {
 	my $pid = shift;
 	my $exists = kill 0, $pid;
@@ -113,35 +118,35 @@ sub is_single_instance {
 	}
 	# open or create pid file
 	sysopen ($xBuild::PID_FILE_HANDLE, $xBuild::PID_FILE, O_RDWR | O_CREAT)
-		or xBuild::error ("Cannot open file: $!: $xBuild::PID_FILE");
+		or xBuild::error ("Cannot open file: $!: ${xBuild::PID_FILE}");
 #	flock($xBuild::PID_FILE_HANDLE, LOCK_EX)
-#		or xBuild::error ("Cannot lock file $!: $xBuild::PID_FILE");
+#		or xBuild::error ("Cannot lock file $!: ${xBuild::PID_FILE}");
 	my $OLD_PID = <$xBuild::PID_FILE_HANDLE>;
 	if (defined $OLD_PID && length($OLD_PID) gt 0) {
-		xBuild::debug ("OLD PID: $OLD_PID");
+		xBuild::debug ("OLD PID: ${OLD_PID}");
 		if (pid_exists($OLD_PID)) {
 			$xBuild::WROTE_PID_FILE = 0;
 			return 0;
 		}
 		sysseek ($xBuild::PID_FILE_HANDLE, 0, SEEK_SET)
-			or xBuild::error ("Cannot seek $!: $xBuild::PID_FILE");
+			or xBuild::error ("Cannot seek $!: ${xBuild::PID_FILE}");
 		truncate ($xBuild::PID_FILE_HANDLE, 0)
-			or xBuild::error ("Cannot truncate $!: $xBuild::PID_FILE");
+			or xBuild::error ("Cannot truncate $!: ${xBuild::PID_FILE}");
 	}
 	# write pid to file
 	$xBuild::WROTE_PID_FILE = 1;
 	syswrite ($xBuild::PID_FILE_HANDLE, $$)
-		or xBuild::error ("Cannot write to $!: $xBuild::PID_FILE");
+		or xBuild::error ("Cannot write to $!: ${xBuild::PID_FILE}");
 	return 1;
 }
 END {
 #	flock($xBuild::PID_FILE_HANDLE, LOCK_UN)
-#		or xBuild::error ("Cannot unlock file $!: $xBuild::PID_FILE");
+#		or xBuild::error ("Cannot unlock file $!: ${xBuild::PID_FILE}");
 	if (defined $xBuild::PID_FILE_HANDLE) {
 		close ($xBuild::PID_FILE_HANDLE);
 		if ( $xBuild::WROTE_PID_FILE == 1 ) {
 			unlink $xBuild::PID_FILE
-				or xBuild::error ("Cannot remove $!: $xBuild::PID_FILE");
+				or xBuild::error ("Cannot remove $!: ${xBuild::PID_FILE}");
 			xBuild::debug ('Removed lock file');
 		}
 	}
@@ -152,27 +157,32 @@ sub set_INSTANCE_SLEEP_MAX_TIME {
 
 
 
+##################################################
+### file tools
+
+
+
 sub load_file_contents {
 	my $filepath = shift;
 	if (length($filepath) == 0) {
 		xBuild::error ("Path argument not provided to load_file_contents() function!");
 		return "";
 	}
-	if (! -f $filepath) {
-		xBuild::debug ("File not found: $filepath");
+	if ( ! -f $filepath) {
+		xBuild::debug ("File not found: ${filepath}");
 		return "";
 	}
-	xBuild::debug ("Loading file: $filepath");
+	xBuild::debug ("Loading file: ${filepath}");
 	open (FILE, '<:encoding(UTF-8)', $filepath)
-		or xBuild::error ("Unable to open file: $filepath");
+		or xBuild::error ("Unable to open file: ${filepath}");
 	my $data = "";
 	while (my $line = <FILE>) {
 		chomp $line;
-		$data .= "$line\n";
+		$data .= "${line}\n";
 	}
 	close (FILE);
 	if (length($data) == 0) {
-		xBuild::debug ("File is empty: $filepath");
+		xBuild::debug ("File is empty: ${filepath}");
 		return "";
 	}
 	return $data;
@@ -200,9 +210,9 @@ sub find_file_in_parents {
 	if (! defined $path || length($path) == 0 || $path eq $xBuild::PWD) {
 		$path = '.';
 	}
-	xBuild::debug ("Checking dir: $path");
+	xBuild::debug ("Checking dir: ${path}");
 	opendir (DIR, $path)
-		or xBuild::error ("$!: $path");
+		or xBuild::error ("$!: ${path}");
 	FILE_LOOP:
 	while (my $file = readdir(DIR)) {
 		if (length($file) == 0) {
@@ -212,14 +222,19 @@ sub find_file_in_parents {
 			next FILE_LOOP;
 		}
 		if ($file eq $find) {
-			xBuild::debug ("Found file: $path / $file");
+			xBuild::debug ("Found file: ${path} / ${file}");
 			closedir (DIR);
-			return "$path/$file";
+			return "${path}/${file}";
 		}
 	}
 	closedir (DIR);
-	return find_file_in_parents ($find, "$path/..", --$deep);
+	return find_file_in_parents ($find, "${path}/..", --$deep);
 }
+
+
+
+##################################################
+### run shell command
 
 
 
@@ -230,12 +245,12 @@ sub run_command {
 		exit 1;
 	}
 	if ($xBuild::testing == 0) {
-		xBuild::debug ("COMMAND:\n$cmd");
+		xBuild::debug ("COMMAND:\n${cmd}");
 		print "\n";
 		system ($cmd) and xBuild::error ("Failed to run command!");
 		print "\n";
 	} else {
-		xBuild::debug ("COMMAND SKIPPED:\n$cmd");
+		xBuild::debug ("COMMAND SKIPPED:\n${cmd}");
 	}
 }
 
@@ -279,14 +294,14 @@ sub small_title {
 	my $full  = ( '*' x ($maxlen + 8) );
 	my $blank = ( ' ' x $maxlen );
 	print "\n\n";
-	print " $full \n";
+	print " ${full} \n";
 	foreach my $line (@lines) {
 		my $padding = $maxlen - length($line);
 		my $padfront = ( ' ' x floor ($padding / 2) );
 		my $padend   = ( ' ' x ceil  ($padding / 2) );
-		print " **  $padfront$line$padend  ** \n";
+		print " **  ${padfront}${line}${padend}  ** \n";
 	}
-	print " $full \n";
+	print " ${full} \n";
 	print "\n";
 }
 sub big_title {
@@ -309,18 +324,18 @@ sub big_title {
 	my $full  = ( '*' x ($maxlen + 10) );
 	my $blank = ( ' ' x $maxlen );
 	print "\n\n";
-	print " $full \n";
-	print " $full \n";
-	print " ***  $blank  *** \n";
+	print " ${full} \n";
+	print " ${full} \n";
+	print " ***  ${blank}  *** \n";
 	foreach my $line (@lines) {
 		my $padding = $maxlen - length($line);
 		my $padfront = ( ' ' x floor ($padding / 2) );
 		my $padend   = ( ' ' x ceil  ($padding / 2) );
-		print " ***  $padfront$line$padend  *** \n";
+		print " ***  ${padfront}${line}${padend}  *** \n";
 	}
-	print " ***  $blank  *** \n";
-	print " $full \n";
-	print " $full \n";
+	print " ***  ${blank}  *** \n";
+	print " ${full} \n";
+	print " ${full} \n";
 	print "\n";
 }
 
@@ -341,7 +356,7 @@ sub debug {
 		if (length($line) == 0) {
 			next LINES_LOOP;
 		}
-		print " [debug]  $line\n";
+		print " [debug]  ${line}\n";
 	}
 }
 sub error {
@@ -355,7 +370,7 @@ sub error {
 	}
 	print "\n\n";
 	print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
-	print "\n [ERROR:$err]  $msg\n\n";
+	print "\n [ERROR:${err}]  ${msg}\n\n";
 	print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
 	print "\n\n";
 	exit 1;

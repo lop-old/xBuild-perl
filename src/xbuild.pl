@@ -68,32 +68,6 @@ our @run_goals = ();
 require '/usr/bin/xBuild/tools.pl';
 
 
-print "\n============================\n";
-
-
-wait_for_instance ();
-#allow_one_instance ();
-
-
-
-
-print "Running...";
-sleep (10000);
-print "done!\n";
-print "============================\n\n";
-exit 1;
-
-
-
-
-
-
-
-
-
-
-
-
 
 sub display_help {
 	print "\n";
@@ -114,34 +88,6 @@ sub display_help {
 	print "\n";
 	exit 1;
 }
-
-
-
-#our $config;
-#our $deploy;
-
-#our $project_name    = "";
-#our $project_version = "";
-
-
-
-#our @goals = ();
-#our @project_version_files = ();
-
-#our $USER = $ENV{USER};
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -189,12 +135,12 @@ while (my $arg = shift(@ARGV)) {
 			}
 			case '--version' {
 				print "\n";
-				print "xBuild $XBUILD_VERSION\n";
+				print "xBuild ${XBUILD_VERSION}\n";
 				print "\n";
 				exit 1;
 			}
 			else {
-				xBuild::error ("Unknown argument: $arg");
+				xBuild::error ("Unknown argument: ${arg}");
 				exit 1;
 			}
 		} # /FLAG_SWITCH
@@ -220,38 +166,57 @@ if ($xBuild::PWD =~ m/^\/(usr|bin)\/.*/ ) {
 
 
 
-# prepare clean build path
-sub clean_build_path {
-	if (length($main::TEMP_BUILD_PATH) == 0) {
-		error ("TEMP_BUILD_PATH value not set!");
+# allow single instance
+xBuild::single_instance ();
+
+
+
+##################################################
+### load config files
+
+
+
+# load xbuild.json
+sub load_xbuild_json {
+	my $config_file = "${xBuild::PWD}/${xBuild::PROJECT_CONFIG_FILE}\n";
+	my $data = load_file_contents ($config_file);
+	if (! defined $data || length($data) == 0) {
+		xBuild::error ("File not found or failed to load: ${config_file}");
 		exit 1;
 	}
-	if ( -d ${main::TEMP_BUILD_PATH} ) {
-		if ( ! -w $main::TEMP_BUILD_PATH ) {
-			error ("Temp build dir is not writable: $main::TEMP_BUILD_PATH");
-			exit 1;
+	$xBuild::config = JSON->new->utf8->decode($data);
+}
+# load xdeploy.json
+sub load_xdeploy_json {
+	xBuild::debug ("Looking for deploy config: ${xBuild::DEPLOY_CONFIG_FILE}");
+	my $found = find_file_in_parents (
+		$xBuild::DEPLOY_CONFIG_FILE,
+		'',
+		$xBuild::DEPLOY_CONFIG_SEARCH_DEPTH
+	);
+	if (length($found) == 0) {
+		xBuild::debug ("File not found: ${xBuild::DEPLOY_CONFIG_FILE}");
+	} else {
+		my $config_file = "${xBuild::PWD}/${found}";
+		xBuild::debug ("Loading file: ${config_file}");
+		my $data = load_file_contents ($config_file);
+		if (defined $data && length($data) > 0) {
+			$xBuild::deploy = JSON->new->utf8->decode($data);
 		}
-		debug ();
-		debug ('Cleaning build path..');
-		debug (`rm -Rvf --preserve-root '$main::TEMP_BUILD_PATH'`);
-	}
-	debug ();
-	debug (`mkdir -p -v -m 0775 '$main::TEMP_BUILD_PATH'`);
-	if ( ! -d $main::TEMP_BUILD_PATH ) {
-		error ("Failed to create temp build dir: $main::TEMP_BUILD_PATH");
-		exit 1;
-	}
-	if ( ! -w $main::TEMP_BUILD_PATH ) {
-		error ("Temp build dir is not writable: $main::TEMP_BUILD_PATH");
-		exit 1;
 	}
 }
 
 
 
+# load configs
+load_xbuild_json ();
+load_xdeploy_json ();
+xBuild::debug ();
 
 
 
+##################################################
+### load goals
 
 
 
