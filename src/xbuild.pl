@@ -51,7 +51,6 @@ Readonly our $PROJECT_CONFIG_FILE  => 'xbuild.json';
 Readonly our $DEPLOY_CONFIG_FILE   => 'xdeploy.json';
 
 Readonly our $TEMP_BUILD_PATH => '/tmp/xbuild';
-Readonly our $DEPLOY_CONFIG_SEARCH_DEPTH => 2;
 
 ##################################################
 
@@ -62,6 +61,7 @@ our $deploy;
 our $dryrun = 0;
 
 our $project_build_number = 'x';
+our $deploy_config_depth  = 2;
 
 our @run_goals = ();
 
@@ -75,6 +75,8 @@ sub display_help {
 	print "Reads a xbuild.json config file from a project and performs build goals.\n";
 	print "\n";
 	print "  -n, --build-number  set the build number\n";
+	print "  -D, --deploy-config-depth  number of parent directories to ascend\n";
+	print "                             when searching for deploy.json config file\n";
 	print "\n";
 	print "  -w, --max-wait  set the max wait in seconds if another instance is busy\n";
 	print "                  set to -1 for no timeout, or 0 to fail immediately\n";
@@ -100,6 +102,9 @@ while (my $arg = shift(@ARGV)) {
 			case '-n' {
 				$arg = '--build-number';
 			}
+			case '-D' {
+				$arg = '--deploy-config-depth';
+			}
 			case '-w' {
 				$arg = '--max-wait';
 			}
@@ -119,6 +124,9 @@ while (my $arg = shift(@ARGV)) {
 		switch ($arg) {
 			case '--build-number' {
 				$project_build_number = shift(@ARGV);
+			}
+			case '--deploy-config-depth' {
+				$xBuild::deploy_config_depth = shift(@ARGV);
 			}
 			case '--max-wait' {
 				set_INSTANCE_SLEEP_MAX_TIME (shift(@ARGV));
@@ -192,7 +200,7 @@ sub load_xdeploy_json {
 	my $found = find_file_in_parents (
 		$xBuild::DEPLOY_CONFIG_FILE,
 		'',
-		$xBuild::DEPLOY_CONFIG_SEARCH_DEPTH
+		$xBuild::deploy_config_depth
 	);
 	if (length($found) == 0) {
 		xBuild::debug ("File not found: ${xBuild::DEPLOY_CONFIG_FILE}");
