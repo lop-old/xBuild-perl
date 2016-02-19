@@ -32,6 +32,7 @@ use warnings;
 
 use IO::File;
 #use Fcntl qw(:flock SEEK_END);
+use Cwd 'abs_path';
 
 
 
@@ -210,6 +211,7 @@ sub find_file_in_parents {
 	if (! defined $path || length($path) == 0 || $path eq $xBuild::PWD) {
 		$path = '.';
 	}
+	$path = abs_path ($path);
 	xBuild::debug ("Checking dir: ${path}");
 	opendir (DIR, $path)
 		or xBuild::error ("$!: ${path}");
