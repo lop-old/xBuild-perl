@@ -74,7 +74,7 @@ sub display_help {
 	print "Usage: xbuild [-hv] [GOAL]...\n";
 	print "Reads a xbuild.json config file from a project and performs build goals.\n";
 	print "\n";
-	print "  -n, --build-number  set the build number\n";
+	print "  -n, --build-number         set the build number\n";
 	print "  -D, --deploy-config-depth  number of parent directories to ascend\n";
 	print "                             when searching for deploy.json config file\n";
 	print "\n";
@@ -82,11 +82,11 @@ sub display_help {
 	print "                  set to -1 for no timeout, or 0 to fail immediately\n";
 	print "                  default: 300 (5 minutes)\n";
 	print "\n";
-	print "  -t, --dry      dry run without writing\n";
-	print "  -d, --debug    debug mode, most verbose logging\n";
+	print "  -t, --dry       dry run without writing\n";
+	print "  -d, --debug     debug mode, most verbose logging\n";
 	print "\n";
-	print "  -h, --help     display this help and exit\n";
-	print "  -v, --version  output version information and exit\n";
+	print "  -h, --help      display this help and exit\n";
+	print "  -v, --version   output version information and exit\n";
 	print "\n";
 	exit 1;
 }
@@ -109,6 +109,9 @@ while (my $arg = shift(@ARGV)) {
 				$arg = '--max-wait';
 			}
 			case '-t' {
+				$arg = '--dry';
+			}
+			case '--test' {
 				$arg = '--dry';
 			}
 			case '-d' {
@@ -166,7 +169,6 @@ if ($xBuild::debug != 0) {
 if ($dryrun != 0) {
 	xBuild::debug ('Dry run enabled');
 }
-xBuild::debug ();
 if ($xBuild::PWD =~ m/^\/(usr|bin)\/.*/ ) {
 	xBuild::error ('Sorry, you cannot run this command from within /usr or /bin');
 	exit 1;
@@ -186,7 +188,7 @@ xBuild::single_instance ();
 
 # load xbuild.json
 sub load_xbuild_json {
-	my $config_file = "${xBuild::PWD}/${xBuild::PROJECT_CONFIG_FILE}\n";
+	my $config_file = "${xBuild::PWD}/${xBuild::PROJECT_CONFIG_FILE}";
 	my $data = load_file_contents ($config_file);
 	if (! defined $data || length($data) == 0) {
 		xBuild::error ("File not found or failed to load: ${config_file}");

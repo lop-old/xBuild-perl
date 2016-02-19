@@ -138,6 +138,7 @@ sub is_single_instance {
 	$xBuild::WROTE_PID_FILE = 1;
 	syswrite ($xBuild::PID_FILE_HANDLE, $$)
 		or xBuild::error ("Cannot write to $!: ${xBuild::PID_FILE}");
+	xBuild::debug ("Atomic lock pid: $$");
 	return 1;
 }
 END {
