@@ -230,6 +230,9 @@ sub find_file_in_parents {
 		}
 	}
 	closedir (DIR);
+	if ($path eq '/') {
+		return "";
+	}
 	return find_file_in_parents ($find, "${path}/..", --$deep);
 }
 
